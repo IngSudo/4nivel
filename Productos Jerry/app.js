@@ -77,10 +77,10 @@ const cargarProductos = async () => {
 
 const mostrarProductos = (productos) => {
   contenedorProductos.innerHTML = "";
-  productos.forEach((producto) => {
+  productos.forEach((producto, idx) => {
     const div = document.createElement("div");
     div.classList.add(
-      "bg-white",
+      "bg-blue-50",
       "rounded-lg",
       "shadow-md",
       "p-4",
@@ -89,14 +89,57 @@ const mostrarProductos = (productos) => {
       "items-center",
       "hover:shadow-lg",
       "transition-shadow",
-      "duration-300"
+      "duration-300",
+      "relative"
     );
     div.innerHTML = `
-        <h2 class="text-lg font-bold mb-2">${producto.title}</h2>
-        <img src="${producto.image}" alt="${producto.title}" loading="lazy" class="w-32 h-32 object-contain mb-4">
-        <p>Precio: $${producto.price}</p>
-        <button class="bg-blue-500 text-white px-4 py-2 rounded mt-4 hover:bg-blue-600 transition-colors duration-300">Agregar al carrito</button>
-      `;
+      <h2 class="text-lg text-center font-bold mb-2">${producto.title}</h2>
+      <img src="${producto.image}" alt="${producto.title}" loading="lazy" class="w-32 h-32 object-contain mb-4">
+      <p>Precio: $${producto.price}</p>
+      <button class="bg-green-200 text-white px-4 py-2 rounded mt-4 hover:bg-blue-600 transition-colors duration-300">Agregar</button>
+      <button id="verDetalle${idx}" class="bg-green-200 text-white px-3 py-1 rounded mt-2 hover:bg-blue-700 transition">Mas Info</button>
+      <div id="modalDetalle${idx}"
+        class="
+          hidden
+          absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+          sm:left-full sm:top-0 sm:ml-4 sm:translate-x-0 sm:translate-y-0
+          z-50 bg-blue-50 rounded-lg shadow-lg p-6 w-80 border border-gray-200
+        ">
+        <button id="cerrarModal${idx}" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-xl">&times;</button>
+        <h3 class="text-xl font-bold mb-2">${producto.title}</h3>
+        <img src="${producto.image}" alt="${producto.title}" loading="lazy" class="w-32 h-32 object-contain mb-4 mx-auto block">
+        <p class="mb-2 text-gray-700">${producto.description}</p>
+        <p class="font-semibold text-blue-700 mb-1">Categoría: ${producto.category}</p>
+        <p class="font-bold text-green-600">Precio: $${producto.price}</p>
+      </div>
+    `;
+
+    setTimeout(() => {
+      const btnVer = div.querySelector(`#verDetalle${idx}`);
+      const modal = div.querySelector(`#modalDetalle${idx}`);
+      const btnCerrar = div.querySelector(`#cerrarModal${idx}`);
+
+      function handleClickOutside(e) {
+        if (modal && !modal.contains(e.target) && e.target !== btnVer) {
+          modal.classList.add("hidden");
+          document.removeEventListener("mousedown", handleClickOutside);
+        }
+      }
+
+      if (btnVer && modal && btnCerrar) {
+        btnVer.onclick = () => {
+          modal.classList.remove("hidden");
+          setTimeout(() => {
+            document.addEventListener("mousedown", handleClickOutside);
+          }, 0);
+        };
+        btnCerrar.onclick = () => {
+          modal.classList.add("hidden");
+          document.removeEventListener("mousedown", handleClickOutside);
+        };
+      }
+    }, 0);
+
     contenedorProductos.append(div);
   });
 };
@@ -111,7 +154,7 @@ try {
     mostrarCategorias(["all", ...categorias]);
   } catch (error) {
     console.error("Error al cargar las categorias:", error);
-    contenedor.innerHTML = "<p>Error al cargar las categorias</p>";
+    contenedorCategorias.innerHTML = "<p>Error al cargar las categorias</p>";
   }
 }
 
@@ -152,5 +195,10 @@ function mostrarCategorias(categorias) {
 
     contenedorCategorias.appendChild(btn); 
   });
+}
+
+function cerrarSesion() {
+  localStorage.removeItem("token"); 
+  window.location.href = "login.html"; 
 }
 
