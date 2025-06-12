@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mi Primera API</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Header compacto -->
+  <header class="bg-purple-200 py-2 px-4 flex justify-between items-center shadow-sm">
+    <span class="text-xl font-bold text-green-600">Mi Primera API</span>
+    <nav class="space-x-4">
+      <a href="#" class="text-blue-600 text-base hover:underline">Inicio</a>
+      <a href="#" class="text-blue-600 text-base hover:underline">Productos</a>
+      <a href="#" class="text-blue-600 text-base hover:underline">Contactanos</a>
+      <a href="#" class="text-blue-600 text-base hover:underline">Cerrar Sesión</a>
+    </nav>
+  </header>
+
+  <section class="bg-blue-50 py-6 text-center">
+    <h1 class="text-2xl font-bold text-green-600 mb-2">Catálogo de Productos</h1>
+    <p class="text-base text-blue-600 mb-4">Explora nuestra sección de productos disponibles</p>
+    <div class="flex justify-center">
+      <input id="buscador" type="text" placeholder="Buscar productos..." class="w-1/2 p-2 rounded-lg border border-gray-400 text-base focus:outline-none focus:ring-2 focus:ring-blue-400">
+    </div>
+  </section>
+
+  <main class="max-w-6xl mx-auto px-4 py-10">
+    <div id="productos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8"></div>
+  </main>
+
+  <script>
+    const contenedorProductos = document.getElementById("productos");
+    const buscador = document.getElementById("buscador");
+    let productosGlobal = [];
+
+    const cargarProductos = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/api/productos");
+        if (!response.ok) throw new Error("Error en la respuesta de la API");
+        const productos = await response.json();
+        productosGlobal = productos;
+        mostrarProductos(productos);
+      } catch (error) {
+        contenedorProductos.innerHTML = "<p class='text-red-500'>Error al cargar los productos</p>";
+      }
+    };
+
+    const mostrarProductos = (productos) => {
+      contenedorProductos.innerHTML = "";
+      if (productos.length === 0) {
+        contenedorProductos.innerHTML = "<p class='text-gray-500 col-span-3 text-center'>No se encontraron productos</p>";
+        return;
+      }
+      productos.forEach((producto, idx) => {
+        const div = document.createElement("div");
+        div.className = "bg-blue-50 rounded-lg shadow-md p-6 flex flex-col items-center hover:shadow-lg transition-shadow duration-300 relative";
+        div.innerHTML = `
+          <h2 class="text-xl text-center font-bold mb-2">${producto.titulo}</h2>
+          <img src="${producto.imagen || producto.image || ''}" alt="${producto.titulo}" loading="lazy" class="w-40 h-40 object-contain mb-4 bg-white rounded">
+          <p class="mb-2 text-lg text-green-700 font-semibold">Precio: $${producto.precio}</p>
+          <button class="bg-green-500 text-white px-4 py-2 rounded mt-2 hover:bg-blue-600 transition-colors duration-300">Agregar</button>
+          <button id="verDetalle${idx}" class="bg-blue-200 text-white px-3 py-1 rounded mt-2 hover:bg-blue-700 transition">Más Info</button>
+          <div id="modalDetalle${idx}"
+            class="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-blue-50 rounded-lg shadow-lg p-6 w-80 border border-gray-200">
+            <button id="cerrarModal${idx}" class="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-xl">&times;</button>
+            <h3 class="text-xl font-bold mb-2">${producto.titulo}</h3>
+            <img src="${producto.imagen || producto.image || ''}" alt="${producto.titulo}" loading="lazy" class="w-32 h-32 object-contain mb-4 mx-auto block">
+            <p class="mb-2 text-gray-700">${producto.descripcion}</p>
+            <p class="font-semibold text-blue-700 mb-1">Categorías: ${(producto.categorias && producto.categorias.length > 0) ? producto.categorias.map(c => c.nombre).join(', ') : 'Sin categoría'}</p>
+            <p class="font-bold text-green-600">Precio: $${producto.precio}</p>
+          </div>
+        `;
+        contenedorProductos.appendChild(div);
+
+        const btnVer = div.querySelector(`#verDetalle${idx}`);
+        const modal = div.querySelector(`#modalDetalle${idx}`);
+        const btnCerrar = div.querySelector(`#cerrarModal${idx}`);
+
+        btnVer.addEventListener("click", () => modal.classList.remove("hidden"));
+        btnCerrar.addEventListener("click", () => modal.classList.add("hidden"));
+      });
+    };
+
+    buscador.addEventListener("input", (e) => {
+      const texto = e.target.value.toLowerCase();
+      const filtrados = productosGlobal.filter(p =>
+        p.titulo.toLowerCase().includes(texto) ||
+        (p.descripcion && p.descripcion.toLowerCase().includes(texto))
+      );
+      mostrarProductos(filtrados);
+    });
+
+    cargarProductos();
+  </script>
+</body>
+</html>
