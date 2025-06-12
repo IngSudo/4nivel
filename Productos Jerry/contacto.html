@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto - Tienda Online</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body { font-family: 'Montserrat', Arial, sans-serif; }
+      #map { width: 100%; height: 400px; border-radius: 1rem; }
+    </style>
+</head>
+<body class="bg-blue-50 min-h-screen flex flex-col items-center">
+    <header class="w-full p-4 bg-violet-200 flex justify-between items-center">
+        <h2 class="text-xl font-semibold text-green-600">Tienda Online</h2>
+        <nav>
+            <ul class="flex gap-4">
+                <li><a href="index.html" class="text-blue-500 hover:underline">Inicio</a></li>
+                <li><a href="index.html#productos" class="text-blue-500 hover:underline">Productos</a></li>
+                <li><a href="contacto.html" class="text-blue-500 hover:underline">Contactanos</a></li>
+                <li><a href="#serrarSesion" onclick="cerrarSesion(); return false;" class="text-blue-500 hover:underline">Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="flex flex-col items-center w-full max-w-2xl mt-10">
+        <h1 class="text-3xl font-bold text-green-600 mb-4">Contáctanos</h1>
+        <p class="mb-6 text-gray-700 text-center">Visítanos en nuestra tienda principal en el Valle de Los Chillos, Sangolqui</p>
+        <div id="map"></div>
+    </main>
+
+    <script>
+      function initMap() {
+        
+        const valle = { lat: -0.331389, lng: -78.443611 };
+  
+        const map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 14,
+          center: valle,
+        });
+       
+        const marker = new google.maps.Marker({
+          position: valle,
+          map: map,
+          title: "Tienda Principal",
+        });
+
+        const infowindow = new google.maps.InfoWindow({
+          content: "<strong>Tienda Principal</strong>",
+        });
+        marker.addListener("click", () => {
+          infowindow.open(map, marker);
+        });
+      }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap" async defer></script>
+    <script src="app.js"></script>
+
+    <footer class="flex justify-center items-center p-4 bg-gray-800 text-white fixed bottom-0 w-full">
+        <p>&copy; 2025 Jerry's Store.</p>
+    </footer>
+</body>
+</html>
